@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "checkJs": false,
+    "skipLibCheck": true,
+    "baseUrl": "."
+  },
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}
+
+
