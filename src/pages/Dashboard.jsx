@@ -815,8 +815,6 @@
 
 
 
-
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthDrawer from './AuthDrawer';
@@ -824,6 +822,7 @@ import Footer from '../components/Footer';
 import { IMAGE_ASSETS, getProductImage } from '../assets/images/imageAssets';
 import { toast } from 'react-toastify';
 import apiService from '../services/api.service.js';
+import BestSellers from './BestSellers'; // Add this import
 
 export default function UserDashboard() {
   const navigate = useNavigate();
@@ -982,34 +981,7 @@ export default function UserDashboard() {
     fetchCategories();
   }, []);
 
-  // Fetch best-selling products from API
-  useEffect(() => {
-    const fetchBestSellingProducts = async () => {
-      try {
-        setBestSellingLoading(true);
-        console.log('🔄 Fetching best-selling products from API...');
-        
-        const data = await apiService.getBestSellingProducts();
-        console.log('📊 Best-selling API Response:', data);
-        
-        if (data && Array.isArray(data)) {
-          console.log('✅ Best-selling products loaded:', data.length, 'products');
-          setBestSellingProducts(data);
-        } else {
-          console.warn('⚠️ No best-selling products data received');
-          setBestSellingProducts([]);
-        }
-      } catch (error) {
-        console.error('❌ Error fetching best-selling products:', error);
-        setBestSellingProducts([]);
-      } finally {
-        setBestSellingLoading(false);
-        console.log('✅ Best-selling products loading completed');
-      }
-    };
-
-    fetchBestSellingProducts();
-  }, []);
+  // Remove old fetchBestSellingProducts useEffect since we're using the BestSellers component
 
   // Fetch subcategories when selected category changes
   useEffect(() => {
@@ -1620,77 +1592,8 @@ export default function UserDashboard() {
         </div>
       </section>
 
-      {/* Bestsellers (images removed, cards retained) */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-12">
-        <div className="flex items-end justify-between">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Bestsellers</h2>
-            <p className="text-sm text-gray-500">Most popular products near you!</p>
-          </div>
-          <div className="hidden sm:block">
-            <button className="rounded-full border border-gray-200 px-4 py-2 text-sm hover:bg-gray-50">View all</button>
-          </div>
-        </div>
-
-        <div className="mt-6 overflow-x-auto pb-2">
-          {bestSellingLoading ? (
-          <div className="flex gap-4 w-max">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="group rounded-2xl border border-gray-100 bg-white w-56 min-w-[220px] animate-pulse">
-                  <div className="relative aspect-[4/3] overflow-hidden rounded-t-2xl bg-gray-200"></div>
-                  <div className="p-4">
-                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-3/4 mb-3"></div>
-                    <div className="h-6 bg-gray-200 rounded w-1/2"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="flex gap-4 w-max">
-              {bestSellingProducts.length > 0 ? (
-                bestSellingProducts.map((product, idx) => (
-              <div key={idx} className="group rounded-2xl border border-gray-100 bg-white hover:shadow-lg transition-shadow w-56 min-w-[220px]">
-                <div className="relative aspect-[4/3] overflow-hidden rounded-t-2xl bg-gray-50">
-                      {product.image && (
-                        <img src={product.image} alt={product.title} className="h-full w-full object-contain p-6" onError={(e) => { e.target.style.display = 'none'; }} />
-                      )}
-                  <div className="absolute left-3 top-3 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 border border-emerald-100">Today in 30 mins</div>
-                      {getItemQty(product.title) > 0 ? (
-                    <div className="absolute bottom-3 right-3 inline-flex items-center rounded-full bg-white/90 border border-gray-200 shadow-sm">
-                          <button onClick={() => decrementItem(product.title)} className="px-3 py-1 text-lg leading-none">-</button>
-                          <span className="px-2 text-sm min-w-[20px] text-center">{getItemQty(product.title)}</span>
-                          <button onClick={() => incrementItem(product.title)} className="px-3 py-1 text-lg leading-none">+</button>
-                    </div>
-                  ) : (
-                        <button onClick={() => addItemToCart({ id: product.title, title: product.title, price: product.price, mrp: product.mrp })} className="absolute bottom-3 right-3 rounded-full bg-white/90 border border-gray-200 px-3 py-1 text-sm font-semibold text-gray-900 hover:bg-white">+</button>
-                  )}
-                </div>
-                <div className="p-4">
-                      <h3 className="line-clamp-2 font-semibold text-gray-900 text-sm">{product.title}</h3>
-                      <p className="mt-1 text-xs text-gray-500">{product.weight}</p>
-                  <div className="mt-3 flex items-baseline gap-2">
-                        <span className="text-lg font-bold">₹{product.price}</span>
-                        <span className="text-xs text-gray-400 line-through">₹{product.mrp}</span>
-                        <span className="ml-auto text-xs text-emerald-600 font-semibold">{Math.max(0, Math.round(((product.mrp - product.price) / product.mrp) * 100))}% off</span>
-                  </div>
-                      {getItemQty(product.title) > 0 ? (
-                    <div className="mt-3 w-full inline-flex items-center justify-between rounded-full border border-red-200 bg-red-50 text-red-700">
-                          <button onClick={() => decrementItem(product.title)} className="px-4 py-2 text-lg">-</button>
-                          <span className="text-sm font-semibold">{getItemQty(product.title)} added</span>
-                          <button onClick={() => incrementItem(product.title)} className="px-4 py-2 text-lg">+</button>
-                    </div>
-                  ) : (
-                        <button onClick={() => addItemToCart({ id: product.title, title: product.title, price: product.price, mrp: product.mrp })} className="mt-3 w-full rounded-full bg-red-500 py-2 text-white text-sm font-semibold hover:bg-red-600">Add to Cart</button>
-                  )}
-                </div>
-              </div>
-                ))
-              ) : null}
-          </div>
-          )}
-        </div>
-      </section>
+      {/* Bestsellers - Replaced with BestSellers component */}
+      <BestSellers />
 
       {/* Categories Grid */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-16">

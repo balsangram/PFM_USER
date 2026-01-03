@@ -5,9 +5,16 @@ class ApiService {
     this.baseURL = API_CONFIG.BASE_URL
     this.timeout = API_CONFIG.TIMEOUT
   }
-
+  getAccessToken() {
+    return (
+      localStorage.getItem('accessToken') ||
+      localStorage.getItem('customerAccessToken') ||
+      null
+    );
+  }
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`
+    console.log('➡️ API URL:', url)
 
     // Resolve access token from localStorage (supports multiple common keys)
     let accessToken = null
@@ -23,7 +30,7 @@ class ApiService {
             u?.accessToken || u?.token || u?.access_token || u?.tokens?.accessToken || null
           )
         })()
-    } catch {}
+    } catch { }
 
     const config = {
       timeout: this.timeout,
@@ -37,11 +44,11 @@ class ApiService {
 
     try {
       const response = await fetch(url, config)
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
-      
+
       const data = await response.json()
       return data
     } catch (error) {
@@ -55,11 +62,18 @@ class ApiService {
     return this.request('/customer/allCategories')
   }
 
+  // async getBestSellingProducts(userId = null) {
+  //   const endpoint = userId 
+  //     ? `/customer/bestSellingProducts/user/${userId}`
+  //     : '/customer/bestSellingProducts'
+  //   return this.request(endpoint)
+  // }
+
   async getBestSellingProducts(userId = null) {
-    const endpoint = userId 
-      ? `/customer/bestSellingProducts/user/${userId}`
-      : '/customer/bestSellingProducts'
-    return this.request(endpoint)
+    const params = userId ? `?userId=${userId}` : ''
+    console.log("hi");
+
+    return this.request(`/products/bestSellingProducts${params}`)
   }
 
   async getCategorySubProducts(categoryId, userId = null) {
@@ -98,12 +112,24 @@ class ApiService {
     return this.request(`/customer/cart/${userId}`)
   }
 
+  // async addToCart(userId, subCategoryId, count = 1) {
+  //   return this.request(`/customer/cart/${userId}`, {
+  //     method: 'POST',
+  //     body: JSON.stringify({ subCategoryId, count })
+  //   })
+  // }
+
   async addToCart(userId, subCategoryId, count = 1) {
-    return this.request(`/customer/cart/${userId}` , {
+    return this.request(`/cart/${userId}`, {
       method: 'POST',
-      body: JSON.stringify({ subCategoryId, count })
-    })
+      body: JSON.stringify({
+        subCategoryId,
+        count: Number(count),
+      }),
+    });
   }
+
+
 
   async updateCartItem(userId, subCategoryId, count) {
     return this.request(`/customer/cart/${userId}/item/${subCategoryId}`, {
@@ -126,7 +152,12 @@ class ApiService {
   async getCustomerProfile(userId) {
     return this.request(`/customer/profile/${userId}`)
   }
+
+
+
 }
+
+
 
 // Create and export a singleton instance
 const apiService = new ApiService()
