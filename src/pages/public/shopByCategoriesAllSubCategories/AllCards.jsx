@@ -4,7 +4,7 @@ import AllCategoriesCard from "../../../components/Card/AllCategoriesCard";
 import { customerApi } from "../../../services/customerApi";
 
 function AllCards() {
-    const { id } = useParams(); // 👈 categoryId from URL
+    const { id } = useParams(); // categoryId from URL
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -22,7 +22,9 @@ function AllCards() {
                         id: product._id,
                         name: product.name,
                         description: product.description,
-                        image: product.img ? product.img.replace(/<|>/g, '') : 'https://via.placeholder.com/400x320?text=No+Image', // Clean URL and fallback
+                        image: product.img
+                            ? product.img.replace(/<|>/g, "")
+                            : "/no-image.png",
                         gram: `${product.weight || ""}${product.unit || ""}`,
                         pieces: product.pieces || "N/A",
                         serves: product.serves || "N/A",
@@ -32,7 +34,8 @@ function AllCards() {
                         discountPercent:
                             product.price > product.discountPrice
                                 ? Math.round(
-                                    ((product.price - product.discountPrice) / product.price) * 100
+                                    ((product.price - product.discountPrice) / product.price) *
+                                    100
                                 )
                                 : 0,
                     }));
@@ -53,21 +56,21 @@ function AllCards() {
     }, [id]);
 
     const handleAddToCart = (productId, productName) => {
-        // TODO: Integrate with actual add to cart API
-        // e.g., customerApi.addToCart(userId, productId).then(() => alert('Added!'));
         console.log("Add to cart:", productName, "ID:", productId);
     };
 
     /* ================= LOADING ================= */
     if (loading) {
         return (
-            <div className="p-4 space-y-4">
-                {[1, 2, 3, 4].map((i) => ( // Increased for more realistic loading
-                    <div
-                        key={i}
-                        className="h-32 bg-gray-100 animate-pulse rounded-xl"
-                    />
-                ))}
+            <div className="w-full max-w-7xl mx-auto px-4 mt-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                    {[1, 2, 3, 4].map((i) => (
+                        <div
+                            key={i}
+                            className="h-80 bg-gray-100 animate-pulse rounded-xl"
+                        />
+                    ))}
+                </div>
             </div>
         );
     }
@@ -75,7 +78,7 @@ function AllCards() {
     /* ================= ERROR ================= */
     if (error) {
         return (
-            <div className="p-4 text-red-600 text-sm">
+            <div className="w-full max-w-7xl mx-auto px-4 mt-8 text-red-600 text-sm">
                 {error}
             </div>
         );
@@ -83,27 +86,31 @@ function AllCards() {
 
     /* ================= UI ================= */
     return (
-        <div className="p-4 space-y-4">
+        <div className="w-full max-w-7xl mx-auto px-4 mt-8">
             {products.length > 0 ? (
-                products.map((item) => (
-                    <AllCategoriesCard
-                        key={item.id}
-                        id={item.id} // 👈 Pass product ID for navigation
-                        name={item.name}
-                        description={item.description}
-                        gram={item.gram}
-                        pieces={item.pieces}
-                        serves={item.serves}
-                        deliveryTime={item.deliveryTime}
-                        price={item.price}
-                        mrpPrice={item.mrpPrice}
-                        discountPercent={item.discountPercent}
-                        image={item.image} // 👈 Pass image for card display
-                        onAction={() => handleAddToCart(item.id, item.name)} // 👈 Pass add to cart handler with ID
-                    />
-                ))
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                    {products.map((item) => (
+                        <AllCategoriesCard
+                            key={item.id}
+                            id={item.id}
+                            name={item.name}
+                            description={item.description}
+                            gram={item.gram}
+                            pieces={item.pieces}
+                            serves={item.serves}
+                            deliveryTime={item.deliveryTime}
+                            price={item.price}
+                            mrpPrice={item.mrpPrice}
+                            discountPercent={item.discountPercent}
+                            image={item.image}
+                            onAction={() =>
+                                handleAddToCart(item.id, item.name)
+                            }
+                        />
+                    ))}
+                </div>
             ) : (
-                <p className="text-sm text-gray-500 text-center">
+                <p className="text-sm text-gray-500 text-center py-10">
                     No products available in this category
                 </p>
             )}

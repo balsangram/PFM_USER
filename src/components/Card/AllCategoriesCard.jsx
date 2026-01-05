@@ -1,95 +1,81 @@
 import React from "react";
 import { Zap } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 
 function AllCategoriesCard({
-    id,
-    name,
-    description,
-    gram,
-    pieces,
-    serves,
-    deliveryTime,
-    price,
-    mrpPrice,
-    discountPercent,
-    image,
-    onAction,
+  name,
+  description,
+  gram,
+  pieces,
+  serves,
+  deliveryTime,
+  price,
+  mrpPrice,
+  discountPercent,
+  image,
+  onAction,
 }) {
-    const navigate = useNavigate();
+  return (
+    <div className="bg-white rounded-xl border shadow-sm hover:shadow-md transition overflow-hidden">
 
-    return (
-        <div
-            onClick={() => navigate(`/full-details/${id}`)}
-            className="bg-white rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer flex overflow-hidden"
-        >
-            {/* LEFT CONTENT */}
-            <div className="flex-1 p-4 space-y-2">
-                <h3 className="font-semibold text-base text-gray-900">
-                    {name}
-                </h3>
+      {/* IMAGE AT TOP */}
+      <div className="relative">
+        <img
+          src={image}
+          alt={name}
+          className="w-full h-44 object-cover"
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = "/no-image.png";
+          }}
+        />
 
-                <p className="text-sm text-gray-600 line-clamp-2">
-                    {description}
-                </p>
+        {discountPercent > 0 && (
+          <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-md">
+            {discountPercent}% OFF
+          </div>
+        )}
+      </div>
 
-                <p className="text-xs text-gray-500">
-                    {gram} | {pieces} Pieces | Serves {serves}
-                </p>
+      {/* TEXT CONTENT AT BOTTOM */}
+      <div className="p-4 space-y-2">
+        <h3 className="font-semibold text-sm text-gray-900 line-clamp-2">
+          {name}
+        </h3>
 
-                <div className="flex items-center gap-1 text-xs text-gray-600">
-                    <Zap size={14} className="text-orange-500" />
-                    Today {deliveryTime}
-                </div>
+        <p className="text-xs text-gray-500 line-clamp-2">
+          {description}
+        </p>
 
-                {/* PRICE */}
-                <div className="flex items-center gap-2 mt-1">
-                    <span className="text-lg font-bold text-gray-900">
-                        ₹{price}
-                    </span>
+        <p className="text-xs text-gray-500">
+          {gram} • {pieces} Pieces • Serves {serves}
+        </p>
 
-                    {mrpPrice && (
-                        <span className="text-sm text-gray-400 line-through">
-                            ₹{mrpPrice}
-                        </span>
-                    )}
-
-                    {discountPercent > 0 && (
-                        <span className="text-xs text-green-600 font-semibold">
-                            {discountPercent}% off
-                        </span>
-                    )}
-                </div>
-            </div>
-
-            {/* RIGHT IMAGE + ACTION */}
-            <div className="relative w-40 flex-shrink-0">
-                <img
-                    src={image}
-                    alt={name}
-                    className="w-full h-full object-cover"
-                />
-
-                {/* DISCOUNT BADGE */}
-                {discountPercent > 0 && (
-                    <span className="absolute top-2 left-2 bg-red-600 text-white text-xs px-2 py-1 rounded">
-                        {discountPercent}% OFF
-                    </span>
-                )}
-
-                {/* ADD BUTTON */}
-                <button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onAction?.();
-                    }}
-                    className="absolute bottom-2 right-2 bg-red-600 text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-red-700 transition"
-                >
-                    Add +
-                </button>
-            </div>
+        <div className="flex items-center gap-2">
+          <span className="text-lg font-bold text-gray-900">
+            ₹{price}
+          </span>
+          <span className="text-sm line-through text-gray-400">
+            ₹{mrpPrice}
+          </span>
+          <span className="text-xs font-semibold text-green-600 ml-auto">
+            Save ₹{mrpPrice - price}
+          </span>
         </div>
-    );
+
+        <div className="flex items-center gap-1 text-xs text-gray-600">
+          <Zap size={14} className="text-orange-500" />
+          Delivery in {deliveryTime}
+        </div>
+
+        <button
+          onClick={onAction}
+          className="w-full mt-2 bg-red-600 hover:bg-red-700 text-white rounded-lg py-2 text-sm font-semibold transition"
+        >
+          ADD
+        </button>
+      </div>
+    </div>
+  );
 }
 
 export default AllCategoriesCard;
