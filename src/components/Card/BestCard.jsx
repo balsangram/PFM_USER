@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Plus, Minus, Zap, ShoppingCart } from "lucide-react";
 import { customerApi } from "../../services/customerApi";
+import { useNavigate } from "react-router-dom";
 
 function BestCard({
     id,
@@ -18,6 +19,7 @@ function BestCard({
     const customerId = localStorage.getItem("customerId");
     const [count, setCount] = useState(initialCount || 0);
     const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
 
     const handleAdd = async () => {
         try {
@@ -39,7 +41,11 @@ function BestCard({
             setLoading(false);
         }
     };
+    const handleCardClick = () => {
+        console.log("hi");
 
+        navigate(`/full-details/${id}`);
+    };
     const handleDecrease = async () => {
         try {
             setLoading(true);
@@ -58,7 +64,7 @@ function BestCard({
     };
 
     return (
-        <div className="w-64 bg-white rounded-xl shadow-sm border hover:shadow-md transition-shadow overflow-hidden">
+        <div onClick={handleCardClick} className="w-64 bg-white rounded-xl shadow-sm border hover:shadow-md transition-shadow overflow-hidden">
 
             {/* Image + Overlay */}
             <div className="relative">
@@ -76,11 +82,15 @@ function BestCard({
                 )}
 
                 {/* Quantity Control */}
-                <div className="absolute bottom-2 right-2">
+                {/* Quantity Control */}
+                <div className="absolute bottom-2 right-2" onClick={(e) => e.stopPropagation()}>
                     {count === 0 ? (
                         <button
                             disabled={loading}
-                            onClick={handleAdd}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleAdd();
+                            }}
                             className="bg-white text-red-600 border border-red-500 rounded-md p-2 shadow hover:bg-red-50 transition"
                         >
                             <Plus size={18} />
@@ -89,7 +99,10 @@ function BestCard({
                         <div className="flex items-center bg-white border border-red-500 rounded-md shadow overflow-hidden">
                             <button
                                 disabled={loading}
-                                onClick={handleDecrease}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDecrease();
+                                }}
                                 className="p-2 text-red-600 hover:bg-red-50 transition"
                             >
                                 <Minus size={16} />
@@ -101,7 +114,10 @@ function BestCard({
 
                             <button
                                 disabled={loading}
-                                onClick={handleIncrease}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleIncrease();
+                                }}
                                 className="p-2 text-red-600 hover:bg-red-50 transition"
                             >
                                 <Plus size={16} />
@@ -109,6 +125,7 @@ function BestCard({
                         </div>
                     )}
                 </div>
+
             </div>
 
             {/* Text Content BELOW image */}

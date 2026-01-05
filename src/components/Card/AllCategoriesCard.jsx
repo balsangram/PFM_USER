@@ -1,7 +1,10 @@
-import React from "react";
-import { Zap } from "lucide-react";
+import React, { useState } from "react";
+import { Zap, Plus, Minus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { customerApi } from "../../services/customerApi";
 
 function AllCategoriesCard({
+  id,
   name,
   description,
   gram,
@@ -12,21 +15,72 @@ function AllCategoriesCard({
   mrpPrice,
   discountPercent,
   image,
-  onAction,
 }) {
-  return (
-    <div className="bg-white rounded-xl border shadow-sm hover:shadow-md transition overflow-hidden">
+  const navigate = useNavigate();
+  const customerId = localStorage.getItem("customerId");
 
-      {/* IMAGE AT TOP */}
+  const [count, setCount] = useState(0);
+  const [loading, setLoading] = useState(false);
+
+  /* ================= NAVIGATION ================= */
+  const handleCardClick = () => {
+    navigate(`/full-details/${id}`);
+  };
+
+  /* ================= CART HANDLERS ================= */
+  const handleAdd = async (e) => {
+    e.stopPropagation();
+    try {
+      setLoading(true);
+      await customerApi.addToCart(customerId, id);
+      setCount(1);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleIncrease = async (e) => {
+    e.stopPropagation();
+    try {
+      setLoading(true);
+      const newCount = count + 1;
+      await customerApi.updateCartItem(customerId, id, newCount);
+      setCount(newCount);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDecrease = async (e) => {
+    e.stopPropagation();
+    try {
+      setLoading(true);
+      const newCount = count - 1;
+
+      if (newCount <= 0) {
+        await customerApi.deleteCartItem(customerId, id);
+        setCount(0);
+      } else {
+        await customerApi.updateCartItem(customerId, id, newCount);
+        setCount(newCount);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div
+      onClick={handleCardClick}
+      className="bg-white rounded-xl border shadow-sm hover:shadow-md transition overflow-hidden cursor-pointer"
+    >
+      {/* IMAGE */}
       <div className="relative">
         <img
           src={image}
           alt={name}
           className="w-full h-44 object-cover"
-          onError={(e) => {
-            e.currentTarget.onerror = null;
-            e.currentTarget.src = "/no-image.png";
-          }}
+          onError={(e) => (e.currentTarget.src = "/no-image.png")}
         />
 
         {discountPercent > 0 && (
@@ -36,7 +90,7 @@ function AllCategoriesCard({
         )}
       </div>
 
-      {/* TEXT CONTENT AT BOTTOM */}
+      {/* CONTENT */}
       <div className="p-4 space-y-2">
         <h3 className="font-semibold text-sm text-gray-900 line-clamp-2">
           {name}
@@ -67,12 +121,40 @@ function AllCategoriesCard({
           Delivery in {deliveryTime}
         </div>
 
-        <button
-          onClick={onAction}
-          className="w-full mt-2 bg-red-600 hover:bg-red-700 text-white rounded-lg py-2 text-sm font-semibold transition"
-        >
-          ADD
-        </button>
+        {/* ADD / QUANTITY CONTROLS */}
+        <div onClick={(e) => e.stopPropagation()}>
+          {count === 0 ? (
+            <button
+              disabled={loading}
+              onClick={handleAdd}
+              className="w-full mt-2 bg-red-600 hover:bg-red-700 text-white rounded-lg py-2 text-sm font-semibold transition disabled:opacity-70"
+            >
+              ADD
+            </button>
+          ) : (
+            <div className="flex items-center justify-between border border-red-500 rounded-lg px-4 py-1.5 mt-2">
+              <button
+                disabled={loading}
+                onClick={handleDecrease}
+                className="p-1.5 text-red-600 hover:bg-red-50 rounded-md"
+              >
+                <Minus size={18} />
+              </button>
+
+              <span className="font-semibold text-red-600">
+                {count}
+              </span>
+
+              <button
+                disabled={loading}
+                onClick={handleIncrease}
+                className="p-1.5 text-red-600 hover:bg-red-50 rounded-md"
+              >
+                <Plus size={18} />
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

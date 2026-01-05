@@ -14,12 +14,13 @@ function SubCategoriCard({ id, name, image }) {
                 <img
                     src={image}
                     alt={name}
-                    className="w-full h-full object-cover"
-                    onError={(e) =>
-                    (e.currentTarget.src =
-                        "https://via.placeholder.com/150?text=No+Image")
-                    }
+                    className="w-full h-32 object-cover rounded-lg"
+                    onError={(e) => {
+                        e.currentTarget.onerror = null; // 🔴 STOP infinite loop
+                        e.currentTarget.src = "/no-image.png";
+                    }}
                 />
+
             </div>
 
             {/* Name */}

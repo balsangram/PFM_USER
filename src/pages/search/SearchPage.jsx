@@ -75,19 +75,20 @@ function SearchPage() {
         fetchSearchResults();
     }, [searchText, customerId]);
 
+    /* ================= UI ================= */
     return (
-        <div className="p-4 space-y-4">
+        <div className="w-full max-w-7xl mx-auto px-4 mt-8 space-y-6">
 
             {/* ================= EMPTY SEARCH ================= */}
             {!searchText.trim() && (
                 <>
-                    <h2 className="text-sm font-semibold text-gray-700">
+                    <h2 className="text-lg font-semibold text-gray-800">
                         Shop by Category
                     </h2>
 
                     {loading && (
                         <div className="flex gap-4">
-                            {[1, 2, 3].map((i) => (
+                            {[1, 2, 3, 4].map((i) => (
                                 <div
                                     key={i}
                                     className="w-28 h-32 bg-gray-100 animate-pulse rounded-xl"
@@ -97,16 +98,22 @@ function SearchPage() {
                     )}
 
                     {!loading && categories.length > 0 && (
-                        <div className="flex gap-4 overflow-x-auto scrollbar-hide">
+                        <div
+                            className="
+      grid
+      grid-cols-2
+      sm:grid-cols-3
+      md:grid-cols-4
+      lg:grid-cols-6
+      gap-4
+    "
+                        >
                             {categories.map((cat) => (
                                 <SubCategoriCard
                                     key={cat._id}
                                     id={cat._id}
                                     name={cat.name}
-                                    image={
-                                        cat.image ||
-                                        "https://via.placeholder.com/120?text=No+Image"
-                                    }
+                                    image={cat.image || "https://via.placeholder.com/120?text=No+Image"}
                                 />
                             ))}
                         </div>
@@ -123,9 +130,20 @@ function SearchPage() {
             {/* ================= SEARCH RESULTS ================= */}
             {searchText.trim() && (
                 <>
-                    <h2 className="text-sm font-semibold text-gray-700">
+                    <h2 className="text-lg font-semibold text-gray-800">
                         Results for “{searchText}”
                     </h2>
+
+                    {loading && (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                            {[1, 2, 3, 4, 5, 6].map((i) => (
+                                <div
+                                    key={i}
+                                    className="h-48 bg-gray-100 animate-pulse rounded-xl"
+                                />
+                            ))}
+                        </div>
+                    )}
 
                     {!loading && results.length === 0 && (
                         <p className="text-sm text-gray-500">
@@ -134,7 +152,16 @@ function SearchPage() {
                     )}
 
                     {!loading && results.length > 0 && (
-                        <div className="space-y-3">
+                        <div
+                            className="
+                grid
+                grid-cols-2
+                sm:grid-cols-3
+                md:grid-cols-4
+                lg:grid-cols-6
+                gap-4
+              "
+                        >
                             {results.map((item) => (
                                 <SearchCard
                                     key={item._id}
@@ -149,6 +176,12 @@ function SearchPage() {
                         </div>
                     )}
                 </>
+            )}
+
+            {error && (
+                <div className="text-sm text-red-600">
+                    {error}
+                </div>
             )}
         </div>
     );
