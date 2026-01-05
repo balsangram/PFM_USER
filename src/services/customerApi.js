@@ -52,4 +52,9 @@ export const customerApi = {
             `/products/full-details-of-sub-categorie-card/${subCategoryId}`
         );
     },
-};
+    searchProducts(name, userId) {
+        return apiClient.request(
+            `/products/search-item?name=${encodeURIComponent(name)}&userId=${userId}`
+        );
+    }
+}
