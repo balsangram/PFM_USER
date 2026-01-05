@@ -1,164 +1,53 @@
-import { API_CONFIG } from '../config/api.config.js'
+import { API_CONFIG } from "../config/api.config.js";
 
-class ApiService {
+class ApiClient {
   constructor() {
-    this.baseURL = API_CONFIG.BASE_URL
-    this.timeout = API_CONFIG.TIMEOUT
+    this.baseURL = API_CONFIG.BASE_URL;
   }
-  getAccessToken() {
-    return (
-      localStorage.getItem('accessToken') ||
-      localStorage.getItem('customerAccessToken') ||
-      null
-    );
-  }
-  async request(endpoint, options = {}) {
-    const url = `${this.baseURL}${endpoint}`
-    console.log('➡️ API URL:', url)
 
-    // Resolve access token from localStorage (supports multiple common keys)
-    let accessToken = null
+  getAccessToken() {
     try {
-      accessToken = localStorage.getItem('accessToken')
-        || localStorage.getItem('token')
-        || localStorage.getItem('customerAccessToken')
-        || (() => {
-          const raw = localStorage.getItem('user')
-          if (!raw) return null
-          const u = JSON.parse(raw)
-          return (
-            u?.accessToken || u?.token || u?.access_token || u?.tokens?.accessToken || null
-          )
+      return (
+        localStorage.getItem("accessToken") ||
+        localStorage.getItem("customerAccessToken") ||
+        localStorage.getItem("token") ||
+        (() => {
+          const raw = localStorage.getItem("user");
+          if (!raw) return null;
+          const u = JSON.parse(raw);
+          return u?.accessToken || u?.token || null;
         })()
-    } catch { }
+      );
+    } catch {
+      return null;
+    }
+  }
+
+  async request(endpoint, options = {}) {
+    const url = `${this.baseURL}${endpoint}`;
+    console.log("➡️ API URL:", url);
+
+    const token = this.getAccessToken();
 
     const config = {
-      timeout: this.timeout,
+      method: options.method || "GET",
       headers: {
-        'Content-Type': 'application/json',
-        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-        ...options.headers
+        "Content-Type": "application/json",
+        ...(token && { Authorization: `Bearer ${token}` }),
+        ...options.headers,
       },
-      ...options
+      body: options.body,
+    };
+
+    const response = await fetch(url, config);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorText}`);
     }
 
-    try {
-      const response = await fetch(url, config)
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const data = await response.json()
-      return data
-    } catch (error) {
-      console.error(`API request failed for ${endpoint}:`, error)
-      throw error
-    }
+    return response.json();
   }
-
-  // Category APIs
-  async getAllCategories() {
-    return this.request('/customer/allCategories')
-  }
-
-  // async getBestSellingProducts(userId = null) {
-  //   const endpoint = userId 
-  //     ? `/customer/bestSellingProducts/user/${userId}`
-  //     : '/customer/bestSellingProducts'
-  //   return this.request(endpoint)
-  // }
-
-  async getBestSellingProducts(userId = null) {
-    const params = userId ? `?userId=${userId}` : ''
-    console.log("hi");
-
-    return this.request(`/products/bestSellingProducts${params}`)
-  }
-
-  async getCategorySubProducts(categoryId, userId = null) {
-    const params = userId ? `?userId=${userId}` : ''
-    return this.request(`/customer/allCategories-subProducts/${categoryId}${params}`)
-  }
-
-  async getCategoriesWithTypes() {
-    return this.request('/customer/categories-types')
-  }
-
-  async getTypeCategoryProducts(typeCategoryId, userId = null) {
-    const params = userId ? `?userId=${userId}` : ''
-    return this.request(`/customer/type-categories-all-card/${typeCategoryId}${params}`)
-  }
-
-  async getSubCategoryDetails(subCategoryId) {
-    return this.request(`/customer/full-details-of-sub-categorie-card/${subCategoryId}`)
-  }
-
-  async searchItems(query) {
-    return this.request(`/customer/search-item?name=${encodeURIComponent(query)}`)
-  }
-
-  async getAllSubCategories(userId = null) {
-    const params = userId ? `?userId=${userId}` : ''
-    return this.request(`/customer/display-all-subcategory${params}`)
-  }
-
-  async getBottomSearchCategories() {
-    return this.request('/customer/allCategories-search-bottom')
-  }
-
-  // Cart APIs
-  async getCart(userId) {
-    return this.request(`/customer/cart/${userId}`)
-  }
-
-  // async addToCart(userId, subCategoryId, count = 1) {
-  //   return this.request(`/customer/cart/${userId}`, {
-  //     method: 'POST',
-  //     body: JSON.stringify({ subCategoryId, count })
-  //   })
-  // }
-
-  async addToCart(userId, subCategoryId, count = 1) {
-    return this.request(`/cart/${userId}`, {
-      method: 'POST',
-      body: JSON.stringify({
-        subCategoryId,
-        count: Number(count),
-      }),
-    });
-  }
-
-
-
-  async updateCartItem(userId, subCategoryId, count) {
-    return this.request(`/customer/cart/${userId}/item/${subCategoryId}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ count })
-    })
-  }
-
-  async deleteCartItem(userId, subCategoryId) {
-    return this.request(`/customer/cart/${userId}/item/${subCategoryId}`, {
-      method: 'DELETE'
-    })
-  }
-
-  async getCartTotals(userId) {
-    return this.request(`/customer/cart-details/${userId}`)
-  }
-
-  // Profile API
-  async getCustomerProfile(userId) {
-    return this.request(`/customer/profile/${userId}`)
-  }
-
-
-
 }
 
-
-
-// Create and export a singleton instance
-const apiService = new ApiService()
-export default apiService
+export default new ApiClient();

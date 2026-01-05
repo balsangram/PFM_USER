@@ -1,0 +1,46 @@
+:root {
+    /* 🔴 Brand Red (Primary) */
+    --color-primary: #e11d48;
+    /* Main red (buttons, cart, highlights) */
+    --color-primary-dark: #be123c;
+    /* Hover / active */
+    --color-primary-light: #fda4af;
+    /* Soft pink accents */
+
+    /* 🌸 Banner / Offer Background */
+    --color-offer-bg: #fde7eb;
+    /* Light pink banner */
+    --color-offer-text: #e11d48;
+
+    /* ⚪ Backgrounds */
+    --color-bg: #ffffff;
+    /* Page background */
+    --color-bg-muted: #f8fafc;
+    /* Sections */
+    --color-card-bg: #ffffff;
+    /* Product cards */
+
+    /* 🖤 Text */
+    --color-text-primary: #111827;
+    /* Main text */
+    --color-text-secondary: #4b5563;
+    /* Sub text */
+    --color-text-muted: #9ca3af;
+    /* Small labels */
+
+    /* 🧱 Borders & Dividers */
+    --color-border: #e5e7eb;
+    --color-border-light: #f1f5f9;
+
+    /* 🟢 Status */
+    --color-success: #16a34a;
+    /* Delivery / success */
+    --color-warning: #f59e0b;
+    /* Limited stock */
+    --color-error: #dc2626;
+    /* Errors */
+
+    /* 🛒 Cart */
+    --color-cart-bg: #ffffff;
+    --color-cart-border: #e11d48;
+}
