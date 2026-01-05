@@ -2,18 +2,16 @@
 import apiClient from "./api.service";
 
 export const customerApi = {
-    getBestSellingProducts(userId) {
-        return apiClient.request(
-            `/products/bestSellingProducts?userId=${userId}`
-        );
-    },
-
-    addToCart(customerId, subCategoryId) {
-        return apiClient.request(`/cart/${customerId}`, {
-            method: "POST",
-            body: JSON.stringify({ subCategoryId, count: 1 }),
-        });
-    },
+  getBestSellingProducts(userId) {
+    const query = userId ? `?userId=${userId}` : "";
+    return apiClient.request(`/products/bestSellingProducts${query}`);
+  },
+  addToCart(customerId, subCategoryId) {
+    return apiClient.request(`/cart/${customerId}`, {
+      method: "POST",
+      body: JSON.stringify({ subCategoryId, count: 1 }),
+    });
+  },
 
     updateCartItem(customerId, subCategoryId, count) {
         if (count <= 0) {
