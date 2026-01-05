@@ -2,16 +2,16 @@
 import apiClient from "./api.service";
 
 export const customerApi = {
-  getBestSellingProducts(userId) {
-    const query = userId ? `?userId=${userId}` : "";
-    return apiClient.request(`/products/bestSellingProducts${query}`);
-  },
-  addToCart(customerId, subCategoryId) {
-    return apiClient.request(`/cart/${customerId}`, {
-      method: "POST",
-      body: JSON.stringify({ subCategoryId, count: 1 }),
-    });
-  },
+    getBestSellingProducts(userId) {
+        const query = userId ? `?userId=${userId}` : "";
+        return apiClient.request(`/products/bestSellingProducts${query}`);
+    },
+    addToCart(customerId, subCategoryId) {
+        return apiClient.request(`/cart/${customerId}`, {
+            method: "POST",
+            body: JSON.stringify({ subCategoryId, count: 1 }),
+        });
+    },
 
     updateCartItem(customerId, subCategoryId, count) {
         if (count <= 0) {
@@ -54,5 +54,21 @@ export const customerApi = {
         return apiClient.request(
             `/products/search-item?name=${encodeURIComponent(name)}&userId=${userId}`
         );
-    }
+    },
+    getCategoryTypes() {
+        return apiClient.request("/products/categories-types");
+    },
+    sendOtp(phone) {
+        return apiClient.request("/customer/send-otp", {
+            method: "POST",
+            body: JSON.stringify({ phone }),
+        });
+    },
+
+    verifyOtp({ phone, otp, userId }) {
+        return apiClient.request("/customer/verify-login", {
+            method: "POST",
+            body: JSON.stringify({ phone, otp, userId }),
+        });
+    },
 }
