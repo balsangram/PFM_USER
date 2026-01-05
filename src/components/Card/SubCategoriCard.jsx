@@ -7,14 +7,23 @@ function SubCategoriCard({ id, name, image }) {
     return (
         <div
             onClick={() => navigate(`/all-cards/${id}`)}
-            className="min-w-[120px] cursor-pointer text-center bg-white rounded-lg border hover:shadow-md transition"
+            className="flex flex-col items-center cursor-pointer group"
         >
-            <img
-                src={image}
-                alt={name}
-                className="w-full h-24 object-cover rounded-t-lg"
-            />
-            <p className="text-sm font-medium py-2 truncate">
+            {/* Circular Image */}
+            <div className="w-28 h-28 rounded-full bg-white flex items-center justify-center overflow-hidden shadow-sm group-hover:shadow-md transition">
+                <img
+                    src={image}
+                    alt={name}
+                    className="w-full h-full object-cover"
+                    onError={(e) =>
+                    (e.currentTarget.src =
+                        "https://via.placeholder.com/150?text=No+Image")
+                    }
+                />
+            </div>
+
+            {/* Name */}
+            <p className="mt-3 text-sm font-medium text-center leading-tight max-w-[110px]">
                 {name}
             </p>
         </div>

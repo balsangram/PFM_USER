@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { Plus, Minus, Zap } from "lucide-react";
+import { customerApi } from "../../services/customerApi";
+// import { customerApi } from "../../../services/customerApi";
 
 function BestCard({
+    id,
     name,
     image,
     unit,
@@ -11,60 +14,97 @@ function BestCard({
     discountPrice,
     offerPercent,
     deliveryTime,
+    count: initialCount,
 }) {
+    const customerId = localStorage.getItem("customerId"); // adjust if needed
+    const [count, setCount] = useState(initialCount || 0);
+    const [loading, setLoading] = useState(false);
+
+    const handleAdd = async () => {
+        try {
+            setLoading(true);
+            await customerApi.addToCart(customerId, id);
+            setCount(1);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleUpdate = async (newCount) => {
+        try {
+            setLoading(true);
+
+            if (newCount <= 0) {
+                await customerApi.deleteCartItem(customerId, id);
+                setCount(0);
+            } else {
+                await customerApi.updateCartItem(customerId, id, newCount);
+                setCount(newCount);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
-        <div className="w-64 bg-white rounded-xl shadow-sm border hover:shadow-md transition">
+        <div className="w-64 bg-white rounded-xl shadow-sm border">
 
             {/* Image */}
-            <div className="relative">
-                <img
-                    src={image}
-                    alt={name}
-                    className="w-full h-40 object-cover rounded-t-xl"
-                />
+            <img
+                src={image}
+                alt={name}
+                className="w-full h-40 object-cover rounded-t-xl"
+            />
 
-                {offerPercent && (
-                    <span className="absolute bottom-2 left-2 bg-green-600 text-white text-xs px-2 py-1 rounded">
-                        {offerPercent}% off
-                    </span>
-                )}
-            </div>
-
-            {/* Content */}
             <div className="p-4 space-y-2">
+                <h3 className="font-semibold text-sm line-clamp-2">{name}</h3>
 
-                {/* Name */}
-                <h3 className="font-semibold text-sm line-clamp-2">
-                    {name}
-                </h3>
-
-                {/* Meta */}
                 <p className="text-xs text-gray-500">
                     {unit} | {pieces} Pieces | Serves {serves}
                 </p>
 
-                {/* Price */}
                 <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold text-gray-900">
-                        ₹{discountPrice}
-                    </span>
-                    {price && (
-                        <span className="text-sm text-gray-400 line-through">
+                    <span className="text-lg font-bold">₹{discountPrice}</span>
+                    {price > discountPrice && (
+                        <span className="text-sm line-through text-gray-400">
                             ₹{price}
                         </span>
                     )}
                 </div>
 
-                {/* Delivery */}
                 <div className="flex items-center gap-1 text-xs text-gray-600">
                     <Zap size={14} className="text-orange-500" />
                     Delivery in {deliveryTime}
                 </div>
 
-                {/* Add button */}
-                <button className="w-full mt-2 border border-red-500 text-red-500 rounded-md py-1.5 font-semibold hover:bg-red-50">
-                    Add
-                </button>
+                {/* ADD / QUANTITY CONTROLS */}
+                {count === 0 ? (
+                    <button
+                        disabled={loading}
+                        onClick={handleAdd}
+                        className="w-full border border-red-500 text-red-500 rounded-md py-1.5 font-semibold"
+                    >
+                        ADD
+                    </button>
+                ) : (
+                    <div className="flex items-center justify-between border border-red-500 rounded-md px-3 py-1">
+                        <button
+                            disabled={loading}
+                            onClick={() => handleUpdate(count - 1)}
+                        >
+                            <Minus size={16} />
+                        </button>
+
+                        <span className="font-semibold">{count}</span>
+
+                        <button
+                            disabled={loading}
+                            onClick={() => handleUpdate(count + 1)}
+                        >
+                            <Plus size={16} />
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );
