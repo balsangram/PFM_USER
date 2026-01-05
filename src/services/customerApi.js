@@ -2,39 +2,43 @@
 import apiClient from "./api.service";
 
 export const customerApi = {
-  getBestSellingProducts(userId) {
-    return apiClient.request(
-      `/products/bestSellingProducts?userId=${userId}`
-    );
-  },
+    getBestSellingProducts(userId) {
+        return apiClient.request(
+            `/products/bestSellingProducts?userId=${userId}`
+        );
+    },
 
-  addToCart(customerId, subCategoryId) {
-    return apiClient.request(`/cart/${customerId}`, {
-      method: "POST",
-      body: JSON.stringify({ subCategoryId, count: 1 }),
-    });
-  },
+    addToCart(customerId, subCategoryId) {
+        return apiClient.request(`/cart/${customerId}`, {
+            method: "POST",
+            body: JSON.stringify({ subCategoryId, count: 1 }),
+        });
+    },
 
-  updateCartItem(customerId, subCategoryId, count) {
-    if (count <= 0) {
-      return this.deleteCartItem(customerId, subCategoryId);
-    }
+    updateCartItem(customerId, subCategoryId, count) {
+        if (count <= 0) {
+            return this.deleteCartItem(customerId, subCategoryId);
+        }
 
-    return apiClient.request(
-      `/cart/${customerId}/item/${subCategoryId}`,
-      {
-        method: "PATCH",
-        body: JSON.stringify({ count }),
-      }
-    );
-  },
+        return apiClient.request(
+            `/cart/${customerId}/item/${subCategoryId}`,
+            {
+                method: "PATCH",
+                body: JSON.stringify({ count }),
+            }
+        );
+    },
 
-  deleteCartItem(customerId, subCategoryId) {
-    return apiClient.request(
-      `/cart/${customerId}/item/${subCategoryId}`,
-      {
-        method: "DELETE",
-      }
-    );
-  },
+    deleteCartItem(customerId, subCategoryId) {
+        return apiClient.request(
+            `/cart/${customerId}/item/${subCategoryId}`,
+            {
+                method: "DELETE",
+            }
+        );
+    },
+    // In customerApi.js
+    getAllCategories() {
+        return apiClient.request("/products/allCategories");
+    },
 };
