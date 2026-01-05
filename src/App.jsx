@@ -25,7 +25,7 @@ function App() {
 
           <Route path="/" element={<Home />} />
           <Route path="/all-cards/:id" element={<AllCards />} />
-          <Route path="/full-details/:subCardId" element={<CardFullDetails />} />
+          <Route path="/full-details/:id" element={<CardFullDetails />} />
           <Route path="/search" element={<SearchPage />} />
 
           {/* ========== PROTECTED ROUTES ========== */}

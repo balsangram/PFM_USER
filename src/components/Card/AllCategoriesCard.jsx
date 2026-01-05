@@ -3,7 +3,7 @@ import { Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 function AllCategoriesCard({
-    id, // ✅ subCardId
+    id,
     name,
     description,
     gram,
@@ -13,27 +13,23 @@ function AllCategoriesCard({
     price,
     mrpPrice,
     discountPercent,
+    image,
     onAction,
-    buttonText = "Add",
 }) {
     const navigate = useNavigate();
 
-    const handleCardClick = () => {
-        navigate(`/full-details/${id}`);
-    };
-
     return (
         <div
-            onClick={handleCardClick}
-            className="bg-white border rounded-xl p-4 shadow-sm hover:shadow-md transition flex gap-4 cursor-pointer"
+            onClick={() => navigate(`/full-details/${id}`)}
+            className="bg-white rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer flex overflow-hidden"
         >
-            {/* Left Content */}
-            <div className="flex-1 space-y-1">
-                <h3 className="font-semibold text-sm text-gray-900">
+            {/* LEFT CONTENT */}
+            <div className="flex-1 p-4 space-y-2">
+                <h3 className="font-semibold text-base text-gray-900">
                     {name}
                 </h3>
 
-                <p className="text-xs text-gray-500 line-clamp-2">
+                <p className="text-sm text-gray-600 line-clamp-2">
                     {description}
                 </p>
 
@@ -43,11 +39,12 @@ function AllCategoriesCard({
 
                 <div className="flex items-center gap-1 text-xs text-gray-600">
                     <Zap size={14} className="text-orange-500" />
-                    Delivery in {deliveryTime}
+                    Today {deliveryTime}
                 </div>
 
+                {/* PRICE */}
                 <div className="flex items-center gap-2 mt-1">
-                    <span className="text-base font-bold text-gray-900">
+                    <span className="text-lg font-bold text-gray-900">
                         ₹{price}
                     </span>
 
@@ -57,24 +54,38 @@ function AllCategoriesCard({
                         </span>
                     )}
 
-                    {discountPercent && (
+                    {discountPercent > 0 && (
                         <span className="text-xs text-green-600 font-semibold">
-                            {discountPercent}% OFF
+                            {discountPercent}% off
                         </span>
                     )}
                 </div>
             </div>
 
-            {/* Right Action */}
-            <div className="flex items-end">
+            {/* RIGHT IMAGE + ACTION */}
+            <div className="relative w-40 flex-shrink-0">
+                <img
+                    src={image}
+                    alt={name}
+                    className="w-full h-full object-cover"
+                />
+
+                {/* DISCOUNT BADGE */}
+                {discountPercent > 0 && (
+                    <span className="absolute top-2 left-2 bg-red-600 text-white text-xs px-2 py-1 rounded">
+                        {discountPercent}% OFF
+                    </span>
+                )}
+
+                {/* ADD BUTTON */}
                 <button
                     onClick={(e) => {
-                        e.stopPropagation(); // 🚫 prevent navigation
+                        e.stopPropagation();
                         onAction?.();
                     }}
-                    className="border border-red-500 text-red-500 px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-red-50 transition"
+                    className="absolute bottom-2 right-2 bg-red-600 text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-red-700 transition"
                 >
-                    {buttonText}
+                    Add +
                 </button>
             </div>
         </div>

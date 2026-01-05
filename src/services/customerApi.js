@@ -41,4 +41,15 @@ export const customerApi = {
     getAllCategories() {
         return apiClient.request("/products/allCategories");
     },
+    getSubProductsByCategory(categoryId) {
+        return apiClient.request(
+            `/products/allCategories-subProducts/${categoryId}`
+        );
+    },
+    // add this method at the bottom
+    getSubProductFullDetails(subCategoryId) {
+        return apiClient.request(
+            `/products/full-details-of-sub-categorie-card/${subCategoryId}`
+        );
+    },
 };
