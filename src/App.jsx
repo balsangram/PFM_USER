@@ -12,7 +12,7 @@ import {
 import MainLayout from "./layout/MainLayout";
 import CardFullDetails from "./pages/subcategori/CardFullDetails";
 import SearchPage from "./pages/search/SearchPage";
-
+  
 function App() {
   return (
     <Suspense fallback={<div className="p-4">Loading...</div>}>

@@ -1,63 +1,54 @@
 // services/customerApi.js
 import apiClient from "./api.service";
+import { getLocalStorage } from "./local.service";
+
+const getCustomerId = () => {
+    const user = getLocalStorage();
+    return user?.id || null;
+};
 
 export const customerApi = {
-    getBestSellingProducts(userId) {
-        const query = userId ? `?userId=${userId}` : "";
+    /* ================= PRODUCTS ================= */
+
+    getBestSellingProducts() {
+        const customerId = getCustomerId();
+        const query = customerId ? `?userId=${customerId}` : "";
         return apiClient.request(`/products/bestSellingProducts${query}`);
     },
-    addToCart(customerId, subCategoryId) {
-        return apiClient.request(`/cart/${customerId}`, {
-            method: "POST",
-            body: JSON.stringify({ subCategoryId, count: 1 }),
-        });
-    },
 
-    updateCartItem(customerId, subCategoryId, count) {
-        if (count <= 0) {
-            return this.deleteCartItem(customerId, subCategoryId);
-        }
-
-        return apiClient.request(
-            `/cart/${customerId}/item/${subCategoryId}`,
-            {
-                method: "PATCH",
-                body: JSON.stringify({ count }),
-            }
-        );
-    },
-
-    deleteCartItem(customerId, subCategoryId) {
-        return apiClient.request(
-            `/cart/${customerId}/item/${subCategoryId}`,
-            {
-                method: "DELETE",
-            }
-        );
-    },
-    // In customerApi.js
     getAllCategories() {
         return apiClient.request("/products/allCategories");
     },
+
     getSubProductsByCategory(categoryId) {
+        const customerId = getCustomerId();
+
         return apiClient.request(
-            `/products/allCategories-subProducts/${categoryId}`
+            `/products/allCategories-subProducts/${categoryId}?userId=${customerId}`
         );
     },
-    // add this method at the bottom
+
+
     getSubProductFullDetails(subCategoryId) {
+        const customerId = getCustomerId();
         return apiClient.request(
-            `/products/full-details-of-sub-categorie-card/${subCategoryId}`
+            `/products/full-details-of-sub-categorie-card/${subCategoryId}?userId=${customerId}`
         );
     },
-    searchProducts(name, userId) {
+
+    searchProducts(name) {
+        const customerId = getCustomerId();
         return apiClient.request(
-            `/products/search-item?name=${encodeURIComponent(name)}&userId=${userId}`
+            `/products/search-item?name=${encodeURIComponent(name)}&userId=${customerId || ""}`
         );
     },
+
     getCategoryTypes() {
         return apiClient.request("/products/categories-types");
     },
+
+    /* ================= AUTH ================= */
+
     sendOtp(phone) {
         return apiClient.request("/customer/send-otp", {
             method: "POST",
@@ -71,4 +62,75 @@ export const customerApi = {
             body: JSON.stringify({ phone, otp, userId }),
         });
     },
+
+    /* ================= CART ================= */
+
+    displayCart(subCategoryId, count = 1) {
+        const customerId = getCustomerId();
+        if (!customerId) throw new Error("User not logged in");
+
+        return apiClient.request(`/cart/${customerId}`, {
+            method: "GET",
+            body: JSON.stringify({
+                subCategoryId,
+                count: Number(count),
+            }),
+
+        });
+    },
+    addToCart(subCategoryId, count = 1) {
+        const customerId = getCustomerId();
+        if (!customerId) throw new Error("User not logged in");
+
+        return apiClient.request(`/cart/${customerId}`, {
+            method: "POST",
+            body: JSON.stringify({
+                subCategoryId,
+                count: Number(count),
+            }),
+        });
+    },
+
+    checkProductInCart(lat, lng) {
+        const customerId = getCustomerId();
+        if (!customerId) throw new Error("User not logged in");
+
+        return apiClient.request(
+            `/cart/check-product/${customerId}/${lat}/${lng}`
+        );
+    },
+
+    updateCartItem(subCategoryId, count) {
+        const customerId = getCustomerId();
+        if (!customerId) throw new Error("User not logged in");
+
+        if (Number(count) <= 0) {
+            return this.deleteCartItem(subCategoryId);
+        }
+
+        return apiClient.request(
+            `/cart/${customerId}/item/${subCategoryId}`,
+            {
+                method: "PATCH",
+                body: JSON.stringify({ count: Number(count) }),
+            }
+        );
+    },
+
+    deleteCartItem(subCategoryId) {
+        const customerId = getCustomerId();
+        if (!customerId) throw new Error("User not logged in");
+
+        return apiClient.request(
+            `/cart/${customerId}/item/${subCategoryId}`,
+            { method: "DELETE" }
+        );
+    },
+
+    displayAmountAndCounts() {
+        const customerId = getCustomerId();
+        if (!customerId) throw new Error("User not logged in");
+        return apiClient.request(`/cart/details/${customerId}`);
+    },
+
 }

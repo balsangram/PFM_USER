@@ -16,7 +16,7 @@ function BestCard({
     deliveryTime,
     count: initialCount,
 }) {
-    const customerId = localStorage.getItem("customerId");
+
     const [count, setCount] = useState(initialCount || 0);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -24,7 +24,7 @@ function BestCard({
     const handleAdd = async () => {
         try {
             setLoading(true);
-            await customerApi.addToCart(customerId, id);
+            await customerApi.addToCart(id);
             setCount(1);
         } finally {
             setLoading(false);
@@ -35,7 +35,7 @@ function BestCard({
         try {
             setLoading(true);
             const newCount = count + 1;
-            await customerApi.updateCartItem(customerId, id, newCount);
+            await customerApi.updateCartItem(id, newCount);
             setCount(newCount);
         } finally {
             setLoading(false);
@@ -52,10 +52,10 @@ function BestCard({
             const newCount = count - 1;
 
             if (newCount <= 0) {
-                await customerApi.deleteCartItem(customerId, id);
+                await customerApi.deleteCartItem(id);
                 setCount(0);
             } else {
-                await customerApi.updateCartItem(customerId, id, newCount);
+                await customerApi.updateCartItem(id, newCount);
                 setCount(newCount);
             }
         } finally {

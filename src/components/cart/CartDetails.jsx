@@ -1,36 +1,84 @@
-import React from "react";
-import { X, Minus, Plus } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { X } from "lucide-react";
+import { customerApi } from "../../services/customerApi";
+import CartCard from "../Card/CartCard";
 
-function CartDetails({ onClose }) {
-    // Dummy cart data
-    const cartItem = {
-        name: "Chicken Mince (Keema)",
-        weight: "450gms",
-        price: 325,
-        quantity: 2,
+function CartDetails({ onClose, lat, lng }) {
+    const [cartItems, setCartItems] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    /* ================= GET CUSTOMER ID ================= */
+    const customerId = (() => {
+        try {
+            const raw = localStorage.getItem("user");
+            if (!raw) return null;
+            const parsed = JSON.parse(raw);
+            return parsed?.user?.id || parsed?.id || null;
+        } catch {
+            return null;
+        }
+    })();
+
+    /* ================= FETCH CART ================= */
+    const fetchCart = async () => {
+        if (!customerId) return;
+
+        try {
+            setLoading(true);
+            const res = await customerApi.checkProductInCart(
+                customerId,
+                lat,
+                lng
+            );
+
+            setCartItems(Array.isArray(res?.data) ? res.data : []);
+        } catch (err) {
+            console.error("Cart fetch error:", err);
+            setCartItems([]);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const deliveryCharge = 39;
-    const subtotal = cartItem.price * cartItem.quantity;
+    useEffect(() => {
+        if (customerId && lat && lng) fetchCart();
+    }, [customerId, lat, lng]);
+
+    /* ================= UPDATE QTY ================= */
+    const updateQty = async (item, newCount) => {
+        if (newCount < 1 || !customerId) return;
+
+        try {
+            await customerApi.updateCartItem(
+                customerId,
+                item.subCategoryId || item._id,
+                newCount
+            );
+            fetchCart();
+        } catch (err) {
+            console.error("Update qty failed:", err);
+        }
+    };
+
+    /* ================= BILL ================= */
+    const deliveryCharge = cartItems.length ? 39 : 0;
+
+    const subtotal = cartItems.reduce((sum, item) => {
+        const price = item.discountPrice ?? item.price ?? 0;
+        return sum + price * item.count;
+    }, 0);
+
     const total = subtotal + deliveryCharge;
 
+    /* ================= UI ================= */
     return (
         <div className="fixed inset-0 z-50 flex">
+            <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
-            {/* Overlay */}
-            <div
-                className="absolute inset-0 bg-black/40"
-                onClick={onClose}
-            />
-
-            {/* Right Drawer */}
             <div className="relative ml-auto w-full sm:w-[420px] bg-white h-full flex flex-col shadow-xl">
-
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b">
-                    <h2 className="text-lg font-semibold">
-                        Order Summary
-                    </h2>
+                    <h2 className="text-lg font-semibold">Cart Items</h2>
                     <button onClick={onClose}>
                         <X size={22} />
                     </button>
@@ -38,76 +86,61 @@ function CartDetails({ onClose }) {
 
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                    {loading && (
+                        <p className="text-sm text-gray-500">
+                            Loading cart…
+                        </p>
+                    )}
 
-                    {/* Cart Item */}
-                    <div className="border rounded-lg p-3 flex justify-between items-start gap-3">
-                        <div>
-                            <h3 className="font-semibold text-sm">
-                                {cartItem.name}
-                            </h3>
+                    {!loading && cartItems.length === 0 && (
+                        <p className="text-sm text-gray-500 text-center">
+                            Your cart is empty
+                        </p>
+                    )}
 
-                            <div className="flex items-center gap-2 mt-2">
-                                <span className="border px-2 py-0.5 rounded text-xs">
-                                    {cartItem.weight}
-                                </span>
-                                <span className="text-red-600 font-semibold text-sm">
-                                    ₹{cartItem.price}
+                    {cartItems.map((item) => (
+                        <CartCard
+                            key={item._id}
+                            item={item}
+                            onIncrease={() =>
+                                updateQty(item, item.count + 1)
+                            }
+                            onDecrease={() =>
+                                updateQty(item, item.count - 1)
+                            }
+                        />
+                    ))}
+
+                    {/* Bill */}
+                    {cartItems.length > 0 && (
+                        <div className="border rounded-lg p-3 text-sm space-y-2">
+                            <div className="flex justify-between">
+                                <span>Subtotal</span>
+                                <span>₹{subtotal}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span>Delivery</span>
+                                <span>₹{deliveryCharge}</span>
+                            </div>
+                            <div className="flex justify-between font-semibold border-t pt-2">
+                                <span>Total</span>
+                                <span className="text-red-600">
+                                    ₹{total}
                                 </span>
                             </div>
                         </div>
-
-                        {/* Quantity Control */}
-                        <div className="flex items-center gap-2">
-                            <button className="w-7 h-7 flex items-center justify-center bg-gray-100 rounded">
-                                <Minus size={14} />
-                            </button>
-                            <span className="text-sm font-semibold">
-                                {cartItem.quantity}
-                            </span>
-                            <button className="w-7 h-7 flex items-center justify-center bg-gray-100 rounded text-red-600">
-                                <Plus size={14} />
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Bill Details */}
-                    <div className="border border-dashed rounded-lg p-3 text-sm space-y-2">
-                        <h4 className="font-semibold">
-                            Bill Details
-                        </h4>
-
-                        <div className="flex justify-between text-gray-600">
-                            <span>Subtotal</span>
-                            <span>₹{subtotal}</span>
-                        </div>
-
-                        <div className="flex justify-between text-gray-600">
-                            <span>Delivery Charge</span>
-                            <span>₹{deliveryCharge}</span>
-                        </div>
-
-                        <div className="flex justify-between font-semibold border-t pt-2">
-                            <span>Total</span>
-                            <span className="text-red-600">
-                                ₹{total}
-                            </span>
-                        </div>
-                    </div>
+                    )}
                 </div>
 
-                {/* Bottom Bar */}
-                <div className="border-t p-4 flex items-center justify-between gap-3">
-                    <div>
-                        <p className="text-sm font-semibold">
-                            Total: ₹{total}
-                        </p>
-                    </div>
-
-                    <button className="bg-red-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-red-700 transition">
+                {/* Footer */}
+                <div className="border-t p-4">
+                    <button
+                        disabled={!cartItems.length}
+                        className="w-full bg-red-600 text-white py-2 rounded-md font-semibold disabled:bg-gray-300"
+                    >
                         Proceed to Checkout
                     </button>
                 </div>
-
             </div>
         </div>
     );

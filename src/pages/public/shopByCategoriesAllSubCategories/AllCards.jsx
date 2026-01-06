@@ -4,7 +4,7 @@ import AllCategoriesCard from "../../../components/Card/AllCategoriesCard";
 import { customerApi } from "../../../services/customerApi";
 
 function AllCards() {
-    const { id } = useParams(); // categoryId from URL
+    const { id } = useParams(); // categoryId
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -25,19 +25,27 @@ function AllCards() {
                         image: product.img
                             ? product.img.replace(/<|>/g, "")
                             : "/no-image.png",
+
                         gram: `${product.weight || ""}${product.unit || ""}`,
                         pieces: product.pieces || "N/A",
                         serves: product.serves || "N/A",
+
                         deliveryTime: "7AM - 9AM",
+
                         price: Math.round(product.discountPrice || product.price),
                         mrpPrice: Math.round(product.price),
+
                         discountPercent:
                             product.price > product.discountPrice
                                 ? Math.round(
-                                    ((product.price - product.discountPrice) / product.price) *
+                                    ((product.price - product.discountPrice) /
+                                        product.price) *
                                     100
                                 )
                                 : 0,
+
+                        // ✅ VERY IMPORTANT
+                        count: Number(product.count || 0),
                     }));
 
                     setProducts(mappedProducts);
@@ -54,10 +62,6 @@ function AllCards() {
 
         if (id) fetchSubProducts();
     }, [id]);
-
-    const handleAddToCart = (productId, productName) => {
-        console.log("Add to cart:", productName, "ID:", productId);
-    };
 
     /* ================= LOADING ================= */
     if (loading) {
@@ -103,9 +107,9 @@ function AllCards() {
                             mrpPrice={item.mrpPrice}
                             discountPercent={item.discountPercent}
                             image={item.image}
-                            onAction={() =>
-                                handleAddToCart(item.id, item.name)
-                            }
+
+                            // ✅ PASS COUNT
+                            count={item.count}
                         />
                     ))}
                 </div>

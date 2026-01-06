@@ -1,4 +1,5 @@
 import { API_CONFIG } from "../config/api.config.js";
+import { getLocalStorage } from "./local.service.js";
 
 class ApiClient {
   constructor() {
@@ -6,21 +7,8 @@ class ApiClient {
   }
 
   getAccessToken() {
-    try {
-      return (
-        localStorage.getItem("accessToken") ||
-        localStorage.getItem("customerAccessToken") ||
-        localStorage.getItem("token") ||
-        (() => {
-          const raw = localStorage.getItem("user");
-          if (!raw) return null;
-          const u = JSON.parse(raw);
-          return u?.accessToken || u?.token || null;
-        })()
-      );
-    } catch {
-      return null;
-    }
+    const auth = getLocalStorage();
+    return auth?.token || null;
   }
 
   async request(endpoint, options = {}) {
@@ -29,17 +17,17 @@ class ApiClient {
 
     const token = this.getAccessToken();
 
-    const config = {
-      method: options.method || "GET",
-      headers: {
-        "Content-Type": "application/json",
-        ...(token && { Authorization: `Bearer ${token}` }),
-        ...options.headers,
-      },
-      body: options.body,
+    const headers = {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(options.headers || {}),
     };
 
-    const response = await fetch(url, config);
+    const response = await fetch(url, {
+      method: options.method || "GET",
+      headers,
+      body: options.body,
+    });
 
     if (!response.ok) {
       const errorText = await response.text();

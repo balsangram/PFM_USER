@@ -2,6 +2,8 @@ import { Outlet } from "react-router-dom";
 import Header from "../components/Header";
 import BottomBar from "../components/BottomBar";
 import Footer from "../components/Footer";
+import OrderNowCard from "../components/Card/OrderNowCard";
+// import OrderNowCard from "src/components/Card/OrderNowCard";
 
 const MainLayout = () => {
     return (
@@ -14,6 +16,10 @@ const MainLayout = () => {
                 <Outlet />
             </main>
 
+            <div className=" bottom-15 fixed left-1/2 transform -translate-x-1/2">
+                <OrderNowCard />
+            </div>
+            {/* </div> */}
             {/* Mobile Bottom Bar ONLY */}
             <div className="md:hidden fixed bottom-0 left-0 right-0 z-50">
                 <BottomBar />
